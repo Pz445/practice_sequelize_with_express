@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const Article = require('../models').Article;
 
 /* Handler function to wrap each route. */
 function asyncHandler(cb){
@@ -14,7 +15,8 @@ function asyncHandler(cb){
 
 /* GET articles listing. */
 router.get('/', asyncHandler(async (req, res) => {
-  res.render("articles/index", { articles: {}, title: "Sequelize-It!" });
+  const articles = await Article.findAll( { order: [['createdAt', 'DESC']] } );
+  res.render("articles/index", { articles: articles, title: "Sequelize-It!" });
 }));
 
 /* Create a new article form. */
@@ -24,7 +26,8 @@ router.get('/new', (req, res) => {
 
 /* POST create article. */
 router.post('/', asyncHandler(async (req, res) => {
-  res.redirect("/articles/");
+  const article = await Article.create(req.body);
+  res.redirect("/articles/" + article.id);
 }));
 
 /* Edit article form. */
@@ -34,7 +37,8 @@ router.get("/:id/edit", asyncHandler(async(req, res) => {
 
 /* GET individual article. */
 router.get("/:id", asyncHandler(async (req, res) => {
-  res.render("articles/show", { article: {}, title: "Article Title" }); 
+  const article = await Article.findByPk(req.params.id);
+  res.render("articles/show", { article: article, title: article.title });
 }));
 
 /* Update an article. */
